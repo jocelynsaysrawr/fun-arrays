@@ -64,9 +64,12 @@ const roundedDimeAccount = obj => {
 };
 var datasetWithRoundedDime = dataset.bankBalances.map(roundedDimeAccount);
 
-
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
-var sumOfBankBalances = null;
+
+var sumOfBankBalances = dataset.bankBalances.reduce((acct, obj) => {
+  let longTotal = acct += Number(obj.amount);
+  return Math.round(longTotal * 100) / 100;
+}, 0);
 
 /*
   from each of the following states:
@@ -79,7 +82,39 @@ var sumOfBankBalances = null;
   take each `amount` and add 18.9% interest to it rounded to the nearest cent
   and then sum it all up into one value saved to `sumOfInterests`
  */
-var sumOfInterests = null;
+
+const whiteList = {
+  'WI': true, 
+  'IL': true, 
+  'WY': true, 
+  'OH': true, 
+  'GA': true, 
+  'DE': true
+};
+
+const interestAccounts = obj => {
+  let states = obj.state;
+  if (whiteList[states]){
+    return true;
+  }else{
+    return false;
+  }
+};
+
+var sumOfInterests = dataset.bankBalances
+  .filter(interestAccounts)
+  .map(obj => {
+    const sameAccount = Object.assign({}, obj);
+    console.log('starting amount: ', sameAccount.amount);
+    sameAccount.amount = sameAccount.amount * .189;
+    console.log('new amount: ', sameAccount.amount);
+    return sameAccount;
+  })
+  .reduce((acct, obj) => {
+    let longTotal = acct += Number(obj.amount);
+    return Math.round(longTotal * 100) / 100;
+  }, 0);
+console.log(sumOfInterests);
 
 /*
   aggregate the sum of bankBalance amounts
