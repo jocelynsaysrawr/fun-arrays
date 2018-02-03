@@ -105,16 +105,13 @@ var sumOfInterests = dataset.bankBalances
   .filter(interestAccounts)
   .map(obj => {
     const sameAccount = Object.assign({}, obj);
-    console.log('starting amount: ', sameAccount.amount);
     sameAccount.amount = sameAccount.amount * .189;
-    console.log('new amount: ', sameAccount.amount);
     return sameAccount;
   })
   .reduce((acct, obj) => {
     let longTotal = acct += Number(obj.amount);
     return Math.round(longTotal * 100) / 100;
   }, 0);
-console.log(sumOfInterests);
 
 /*
   aggregate the sum of bankBalance amounts
@@ -132,7 +129,19 @@ console.log(sumOfInterests);
     round this number to the nearest 10th of a cent before moving on.
   )
  */
-var stateSums = null;
+var stateSums = dataset.bankBalances.reduce((accum, obj) => {
+    let states = obj.state;
+    let amounts = Math.round(obj.amount * 100) / 100;
+    if (states in accum){
+      accum[states] += amounts;
+      accum[states] = Math.round(accum[states] * 100) / 100;
+    }else{
+      accum[states] = amounts;
+    }
+    return accum;
+  }, {});
+
+  console.log(stateSums);
 
 /*
   for all states *NOT* in the following states:
