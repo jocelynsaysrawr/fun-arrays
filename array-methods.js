@@ -5,7 +5,9 @@ var dataset = require('./dataset.json');
   greater than 100000
   assign the resulting new array to `hundredThousandairs`
 */
-var hundredThousandairs = null;
+
+const greaterThanHundredThousand = obj => obj.amount > 100000;
+var hundredThousandairs = dataset.bankBalances.filter(greaterThanHundredThousand);
 
 /*
   DO NOT MUTATE DATA.
@@ -24,7 +26,13 @@ var hundredThousandairs = null;
     }
   assign the resulting new array to `datasetWithRoundedDollar`
 */
-var datasetWithRoundedDollar = null;
+
+const roundedAccount = obj => {
+  const sameAccount = Object.assign({}, obj);
+  sameAccount.rounded = Math.round(obj.amount);
+  return sameAccount;
+};
+var datasetWithRoundedDollar = dataset.bankBalances.map(roundedAccount);
 
 /*
   DO NOT MUTATE DATA.
@@ -49,10 +57,19 @@ var datasetWithRoundedDollar = null;
     }
   assign the resulting new array to `roundedDime`
 */
-var datasetWithRoundedDime = null;
+const roundedDimeAccount = obj => {
+  const sameAccount = Object.assign({}, obj);
+  sameAccount.roundedDime = Math.round(obj.amount * 10) / 10;
+  return sameAccount;
+};
+var datasetWithRoundedDime = dataset.bankBalances.map(roundedDimeAccount);
 
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
-var sumOfBankBalances = null;
+
+var sumOfBankBalances = dataset.bankBalances.reduce((acct, obj) => {
+  let longTotal = acct += Number(obj.amount);
+  return Math.round(longTotal * 100) / 100;
+}, 0);
 
 /*
   from each of the following states:
@@ -65,7 +82,36 @@ var sumOfBankBalances = null;
   take each `amount` and add 18.9% interest to it rounded to the nearest cent
   and then sum it all up into one value saved to `sumOfInterests`
  */
-var sumOfInterests = null;
+
+const whiteList = {
+  'WI': true, 
+  'IL': true, 
+  'WY': true, 
+  'OH': true, 
+  'GA': true, 
+  'DE': true
+};
+
+const interestAccounts = obj => {
+  let states = obj.state;
+  if (whiteList[states]){
+    return true;
+  }else{
+    return false;
+  }
+};
+
+var sumOfInterests = dataset.bankBalances
+  .filter(interestAccounts)
+  .map(obj => {
+    const sameAccount = Object.assign({}, obj);
+    sameAccount.amount = sameAccount.amount * .189;
+    return sameAccount;
+  })
+  .reduce((acct, obj) => {
+    let longTotal = acct += Number(obj.amount);
+    return Math.round(longTotal * 100) / 100;
+  }, 0);
 
 /*
   aggregate the sum of bankBalance amounts
@@ -83,7 +129,19 @@ var sumOfInterests = null;
     round this number to the nearest 10th of a cent before moving on.
   )
  */
-var stateSums = null;
+var stateSums = dataset.bankBalances.reduce((accum, obj) => {
+    let states = obj.state;
+    let amounts = Math.round(obj.amount * 100) / 100;
+    if (states in accum){
+      accum[states] += amounts;
+      accum[states] = Math.round(accum[states] * 100) / 100;
+    }else{
+      accum[states] = amounts;
+    }
+    return accum;
+  }, {});
+
+  console.log(stateSums);
 
 /*
   for all states *NOT* in the following states:
